@@ -1,6 +1,6 @@
-# DevCodec - Developer Encoding/Decoding Tool
+# DevCodec - Developer Encoding/Decoding Toolkit
 
-A Chrome browser extension providing all-in-one encoding/decoding tools for developers.
+A Chrome browser extension providing all-in-one encoding/decoding and developer utility tools.
 
 ## Features
 
@@ -10,6 +10,8 @@ A Chrome browser extension providing all-in-one encoding/decoding tools for deve
 - **HTML** - Encode/decode HTML entities
 - **Timestamp** - Convert between timestamp and datetime (seconds/milliseconds)
 - **Hash** - Generate MD5 and SHA-256 hashes
+- **Password Generator** - Cryptographically secure random passwords with customizable length, character types, strength indicator, and crack time estimation
+- **QR Code Generator** - Generate QR codes from URLs or text, with auto https:// completion, center logo embedding, and multi-size PNG download (200/400/800px)
 
 ## Installation
 
@@ -60,6 +62,10 @@ MIT License - See [LICENSE](LICENSE) file
 Issues and pull requests are welcome!
 
 ## Changelog
+
+### v1.1.0 (2026-03-26)
+- Added Password Generator with crack time estimation
+- Added QR Code Generator with logo embedding and multi-size download
 
 ### v1.0.0 (2026-03-26)
 - Initial release

@@ -9,7 +9,9 @@ const translations = {
       jwt: 'JWT',
       html: 'HTML',
       timestamp: 'Time',
-      hash: 'Hash'
+      hash: 'Hash',
+      password: 'Pwd',
+      qrcode: 'QR'
     },
     common: {
       input: 'Input',
@@ -53,6 +55,31 @@ const translations = {
       hash: {
         title: 'Hash Generator',
         generate: 'Generate'
+      },
+      password: {
+        title: 'Password Generator',
+        length: 'Length',
+        symbols: '!@#$',
+        generate: 'Generate',
+        batch: 'Batch x5',
+        strength: { weak: 'Weak', fair: 'Fair', good: 'Good', strong: 'Strong' },
+        crackTime: 'Crack time',
+        instantly: 'Instantly',
+        seconds: 's', minutes: 'min', hours: 'h', days: 'd',
+        years: 'years', centuries: 'centuries', forever: '10000+ years'
+      },
+      qrcode: {
+        title: 'QR Code Generator',
+        url: 'URL or Text',
+        generate: 'Generate',
+        download: 'Download PNG',
+        downloadAs: 'Download:',
+        copyImage: 'Copy Image',
+        autoHttps: 'Auto https://',
+        logo: 'Center Logo',
+        uploadLogo: 'Upload',
+        empty: 'Please enter text or URL',
+        tooLong: 'Text too long for QR code (max ~900 chars)'
       }
     }
   },
@@ -63,7 +90,9 @@ const translations = {
       jwt: 'JWT',
       html: 'HTML',
       timestamp: '时间',
-      hash: '哈希'
+      hash: '哈希',
+      password: '密码',
+      qrcode: '二维码'
     },
     common: {
       input: '输入',
@@ -107,6 +136,31 @@ const translations = {
       hash: {
         title: '哈希生成器',
         generate: '生成'
+      },
+      password: {
+        title: '随机密码生成器',
+        length: '长度',
+        symbols: '!@#$',
+        generate: '生成',
+        batch: '批量 x5',
+        strength: { weak: '弱', fair: '一般', good: '良好', strong: '强' },
+        crackTime: '破解时间',
+        instantly: '瞬间',
+        seconds: '秒', minutes: '分钟', hours: '小时', days: '天',
+        years: '年', centuries: '世纪', forever: '10000+ 年'
+      },
+      qrcode: {
+        title: '二维码生成器',
+        url: 'URL 或文本',
+        generate: '生成',
+        download: '下载 PNG',
+        downloadAs: '下载：',
+        copyImage: '复制图片',
+        autoHttps: '自动补全 https://',
+        logo: '中心 Logo',
+        uploadLogo: '上传',
+        empty: '请输入文本或 URL',
+        tooLong: '文本过长，无法生成二维码（最多约 900 字符）'
       }
     }
   }
@@ -203,7 +257,8 @@ function updatePlaceholders() {
     'url-input': 'Enter URL or text...',
     'jwt-input': 'Paste JWT token here...',
     'html-input': 'Enter text with HTML entities...',
-    'hash-input': 'Enter text to hash...'
+    'hash-input': 'Enter text to hash...',
+    'qr-input': 'https://example.com'
   };
   
   Object.entries(placeholders).forEach(([id, enText]) => {
@@ -221,7 +276,8 @@ function getPlaceholderZh(id) {
     'jwt-input': '粘贴 JWT token...',
     'html-input': '输入包含 HTML 实体的文本...',
     'hash-input': '输入要哈希的文本...',
-    'ts-input': '1711452600'
+    'ts-input': '1711452600',
+    'qr-input': 'https://example.com'
   };
   return zhPlaceholders[id] || '';
 }
@@ -258,6 +314,8 @@ function initTools() {
   initHTMLTool();
   initTimestampTool();
   initHashTool();
+  initPasswordTool();
+  initQRCodeTool();
   initCopyButtons();
 }
 
@@ -548,6 +606,738 @@ function initCopyButtons() {
     });
   });
 }
+
+// Password Generator Tool
+function initPasswordTool() {
+  const slider = $('#pwd-length-slider');
+  const numInput = $('#pwd-length-num');
+
+  slider.addEventListener('input', () => { numInput.value = slider.value; });
+  numInput.addEventListener('input', () => {
+    const v = Math.max(4, Math.min(64, parseInt(numInput.value) || 16));
+    numInput.value = v;
+    slider.value = v;
+  });
+
+  $('#pwd-generate').addEventListener('click', () => {
+    const pwd = generatePassword();
+    if (!pwd) return;
+    $('#pwd-output').value = pwd;
+    updatePasswordStrength(pwd);
+    $('#pwd-batch-results').style.display = 'none';
+  });
+
+  $('#pwd-batch').addEventListener('click', () => {
+    const container = $('#pwd-batch-results');
+    container.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const pwd = generatePassword();
+      if (!pwd) return;
+      const row = document.createElement('div');
+      row.className = 'pwd-batch-row';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.readOnly = true;
+      input.value = pwd;
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.style.cssText = 'position:static;opacity:0.8';
+      btn.textContent = '⎘';
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(pwd);
+        showToast(getTranslation('common.copied'));
+      });
+      row.appendChild(input);
+      row.appendChild(btn);
+      container.appendChild(row);
+    }
+    container.style.display = 'flex';
+    $('#pwd-output').value = '';
+    $('#pwd-strength').textContent = '';
+  });
+}
+
+function generatePassword() {
+  const length = parseInt($('#pwd-length-num').value) || 16;
+  const useUpper = $('#pwd-uppercase').checked;
+  const useLower = $('#pwd-lowercase').checked;
+  const useNums = $('#pwd-numbers').checked;
+  const useSyms = $('#pwd-symbols').checked;
+
+  let charset = '';
+  if (useUpper) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if (useLower) charset += 'abcdefghijklmnopqrstuvwxyz';
+  if (useNums) charset += '0123456789';
+  if (useSyms) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+  if (!charset) {
+    showToast(currentLang === 'zh' ? '请至少选择一种字符类型' : 'Select at least one character type');
+    return null;
+  }
+
+  const arr = new Uint32Array(length);
+  crypto.getRandomValues(arr);
+  let pwd = '';
+  for (let i = 0; i < length; i++) {
+    pwd += charset[arr[i] % charset.length];
+  }
+  return pwd;
+}
+
+function updatePasswordStrength(pwd) {
+  const el = $('#pwd-strength');
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 16) score++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if (/\d/.test(pwd)) score++;
+  if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+
+  const levels = ['weak', 'weak', 'fair', 'good', 'strong', 'strong'];
+  const colors = ['var(--accent-pink)', 'var(--accent-pink)', 'var(--accent-orange)', 'var(--accent-cyan)', 'var(--accent-green)', 'var(--accent-green)'];
+  const level = levels[score];
+  const label = getTranslation(`tools.password.strength.${level}`) || level;
+
+  el.textContent = label;
+  el.style.color = colors[score];
+
+  // Crack time estimation
+  const crackEl = $('#pwd-crack-time');
+  const crackStr = estimateCrackTime(pwd);
+  const crackLabel = getTranslation('tools.password.crackTime') || 'Crack time';
+  crackEl.innerHTML = `<span class="crack-label">${crackLabel}:</span> <span class="crack-value">${crackStr}</span>`;
+  crackEl.style.color = colors[score];
+}
+
+function estimateCrackTime(pwd) {
+  let poolSize = 0;
+  if (/[a-z]/.test(pwd)) poolSize += 26;
+  if (/[A-Z]/.test(pwd)) poolSize += 26;
+  if (/\d/.test(pwd)) poolSize += 10;
+  if (/[^a-zA-Z0-9]/.test(pwd)) poolSize += 32;
+  if (poolSize === 0) poolSize = 26;
+
+  // 10 billion guesses/sec (modern GPU cluster)
+  const guessesPerSec = 1e10;
+  const combinations = Math.pow(poolSize, pwd.length);
+  const seconds = combinations / guessesPerSec / 2; // average case
+
+  if (seconds < 1) return getTranslation('tools.password.instantly') || 'Instantly';
+  if (seconds < 60) return `${Math.floor(seconds)} ${getTranslation('tools.password.seconds') || 's'}`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} ${getTranslation('tools.password.minutes') || 'min'}`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} ${getTranslation('tools.password.hours') || 'h'}`;
+  if (seconds < 31536000) return `${Math.floor(seconds / 86400)} ${getTranslation('tools.password.days') || 'd'}`;
+
+  const years = seconds / 31536000;
+  if (years < 100) return `~${Math.floor(years)} ${getTranslation('tools.password.years') || 'years'}`;
+  if (years < 1e4) return `~${Math.floor(years).toLocaleString()} ${getTranslation('tools.password.years') || 'years'}`;
+  if (years < 1e6) return `~${(years / 1e3).toFixed(0)}K ${getTranslation('tools.password.years') || 'years'}`;
+  if (years < 1e9) return `~${(years / 1e6).toFixed(0)}M ${getTranslation('tools.password.years') || 'years'}`;
+  if (years < 1e12) return `~${(years / 1e9).toFixed(0)}B ${getTranslation('tools.password.years') || 'years'}`;
+  return getTranslation('tools.password.forever') || '10000+ years';
+}
+
+// QR Code Generator Tool
+let qrLogoImage = null;
+let lastQRData = null;
+
+function initQRCodeTool() {
+  $('#qr-generate').addEventListener('click', generateQRCode);
+  $('#qr-clear').addEventListener('click', () => {
+    $('#qr-input').value = '';
+    $('#qr-output').style.display = 'none';
+    lastQRData = null;
+  });
+  $('#qr-copy-img').addEventListener('click', copyQRImage);
+
+  // Logo upload
+  const logoInput = $('#qr-logo-input');
+  $('#qr-logo-btn').addEventListener('click', () => logoInput.click());
+  logoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        qrLogoImage = img;
+        $('#qr-logo-name').textContent = file.name.length > 12 ? file.name.slice(0, 10) + '...' : file.name;
+        $('#qr-logo-clear').style.display = 'inline-flex';
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $('#qr-logo-clear').addEventListener('click', () => {
+    qrLogoImage = null;
+    $('#qr-logo-input').value = '';
+    $('#qr-logo-name').textContent = '';
+    $('#qr-logo-clear').style.display = 'none';
+  });
+
+  // Multi-size download buttons
+  document.querySelectorAll('.qr-dl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const size = parseInt(btn.getAttribute('data-size'));
+      downloadQRAtSize(size);
+    });
+  });
+}
+
+function getQRInputText() {
+  let text = $('#qr-input').value.trim();
+  if (!text) return '';
+
+  // Auto-prepend https:// if enabled and looks like a domain
+  if ($('#qr-auto-https').checked && !text.match(/^[a-zA-Z]+:\/\//)) {
+    const domainLike = /^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}(\/.*)?$/;
+    if (domainLike.test(text)) {
+      text = 'https://' + text;
+    }
+  }
+  return text;
+}
+
+function generateQRCode() {
+  const text = getQRInputText();
+  if (!text) {
+    showToast(getTranslation('tools.qrcode.empty'));
+    return;
+  }
+  if (text.length > 900) {
+    showToast(getTranslation('tools.qrcode.tooLong'));
+    return;
+  }
+
+  try {
+    lastQRData = QRCodeGenerator.generate(text);
+    const canvas = $('#qr-canvas');
+    renderQRToCanvas(canvas, 200);
+    $('#qr-output').style.display = 'flex';
+  } catch (e) {
+    showToast('QR generation failed');
+  }
+}
+
+function renderQRToCanvas(canvas, pixelSize) {
+  if (!lastQRData) return;
+  QRCodeGenerator.render(lastQRData, canvas, pixelSize, qrLogoImage);
+}
+
+function downloadQRAtSize(size) {
+  if (!lastQRData) return;
+  const offscreen = document.createElement('canvas');
+  QRCodeGenerator.render(lastQRData, offscreen, size, qrLogoImage);
+  const link = document.createElement('a');
+  link.download = `qrcode_${size}px.png`;
+  link.href = offscreen.toDataURL('image/png');
+  link.click();
+}
+
+async function copyQRImage() {
+  try {
+    const canvas = $('#qr-canvas');
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    showToast(getTranslation('common.copied'));
+  } catch (e) {
+    showToast('Copy failed');
+  }
+}
+
+// Minimal QR Code encoder (supports byte mode, error correction level M)
+const QRCodeGenerator = (() => {
+  const ECL_M = 0;
+
+  // Version capacity table for byte mode, ECL-M
+  const VERSION_CAPACITY = [
+    0,17,32,53,78,106,134,154,192,230,271,
+    321,367,425,458,520,586,644,718,792,858,
+    929,1003,1091,1171,1273,1367,1465,1528,1628,1732,
+    1840,1952,2068,2188,2303,2431,2563,2699,2809,2953
+  ];
+
+  function getVersion(dataLen) {
+    for (let v = 1; v <= 40; v++) {
+      if (dataLen <= VERSION_CAPACITY[v]) return v;
+    }
+    return -1;
+  }
+
+  function getModuleCount(version) { return version * 4 + 17; }
+
+  // GF(256) math
+  const EXP = new Uint8Array(256);
+  const LOG = new Uint8Array(256);
+  (() => {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      EXP[i] = x;
+      LOG[x] = i;
+      x = (x << 1) ^ (x & 128 ? 0x11d : 0);
+    }
+    EXP[255] = EXP[0];
+  })();
+
+  function gfMul(a, b) {
+    if (a === 0 || b === 0) return 0;
+    return EXP[(LOG[a] + LOG[b]) % 255];
+  }
+
+  function polyMul(a, b) {
+    const result = new Uint8Array(a.length + b.length - 1);
+    for (let i = 0; i < a.length; i++) {
+      for (let j = 0; j < b.length; j++) {
+        result[i + j] ^= gfMul(a[i], b[j]);
+      }
+    }
+    return result;
+  }
+
+  function getGeneratorPoly(degree) {
+    let g = new Uint8Array([1]);
+    for (let i = 0; i < degree; i++) {
+      g = polyMul(g, new Uint8Array([1, EXP[i]]));
+    }
+    return g;
+  }
+
+  function getECCCodewords(data, eccCount) {
+    const gen = getGeneratorPoly(eccCount);
+    const msg = new Uint8Array(data.length + eccCount);
+    msg.set(data);
+    for (let i = 0; i < data.length; i++) {
+      const coef = msg[i];
+      if (coef !== 0) {
+        for (let j = 0; j < gen.length; j++) {
+          msg[i + j] ^= gfMul(gen[j], coef);
+        }
+      }
+    }
+    return msg.slice(data.length);
+  }
+
+  // EC block info [totalCodewords, dataCodewords, numBlocks, eccPerBlock]
+  const EC_TABLE = {
+    1:[26,16,1,10],2:[44,28,1,16],3:[70,44,1,26],4:[100,64,2,18],
+    5:[134,86,2,26],6:[172,108,2,32],7:[196,124,2,36],8:[242,154,2,40],
+    9:[292,182,2,44],10:[346,216,4,28],11:[404,254,4,32],12:[466,290,4,36],
+    13:[532,334,4,40],14:[581,365,4,43],15:[655,415,4,47],16:[733,453,4,51],
+    17:[815,507,4,55],18:[901,563,4,59],19:[991,627,4,63],20:[1085,669,4,67],
+    21:[1156,714,4,29],22:[1258,782,4,31],23:[1364,860,4,33],24:[1474,914,4,35],
+    25:[1588,1000,4,37],26:[1706,1062,4,39],27:[1828,1128,4,41],28:[1921,1193,4,43],
+    29:[2051,1267,4,45],30:[2185,1373,4,47],31:[2323,1455,4,49],32:[2465,1541,4,51],
+    33:[2611,1631,4,53],34:[2761,1725,4,55],35:[2876,1812,4,57],36:[3034,1914,4,59],
+    37:[3196,1992,4,61],38:[3362,2102,4,63],39:[3532,2216,4,65],40:[3706,2334,4,67]
+  };
+
+  function encodeData(text, version) {
+    const bytes = new TextEncoder().encode(text);
+    const ecInfo = EC_TABLE[version];
+    const totalDataCW = ecInfo[1];
+
+    const bits = [];
+    function pushBits(val, len) {
+      for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1);
+    }
+
+    // Mode: byte (0100)
+    pushBits(4, 4);
+    // Character count
+    const ccBits = version <= 9 ? 8 : 16;
+    pushBits(bytes.length, ccBits);
+    // Data
+    for (const b of bytes) pushBits(b, 8);
+    // Terminator
+    const capacity = totalDataCW * 8;
+    const termLen = Math.min(4, capacity - bits.length);
+    pushBits(0, termLen);
+    // Pad to byte boundary
+    while (bits.length % 8 !== 0) bits.push(0);
+    // Pad bytes
+    const padBytes = [0xEC, 0x11];
+    let padIdx = 0;
+    while (bits.length < capacity) {
+      pushBits(padBytes[padIdx % 2], 8);
+      padIdx++;
+    }
+
+    const dataCodewords = new Uint8Array(totalDataCW);
+    for (let i = 0; i < totalDataCW; i++) {
+      let byte = 0;
+      for (let b = 0; b < 8; b++) byte = (byte << 1) | (bits[i * 8 + b] || 0);
+      dataCodewords[i] = byte;
+    }
+
+    return dataCodewords;
+  }
+
+  function interleaveAndECC(dataCodewords, version) {
+    const ecInfo = EC_TABLE[version];
+    const numBlocks = ecInfo[2];
+    const eccPerBlock = ecInfo[3];
+    const totalDataCW = ecInfo[1];
+    const cwPerBlock = Math.floor(totalDataCW / numBlocks);
+    const extraCW = totalDataCW % numBlocks;
+
+    const dataBlocks = [];
+    const eccBlocks = [];
+    let offset = 0;
+
+    for (let b = 0; b < numBlocks; b++) {
+      const blockLen = cwPerBlock + (b >= numBlocks - extraCW && extraCW > 0 ? 1 : 0);
+      const block = dataCodewords.slice(offset, offset + blockLen);
+      offset += blockLen;
+      dataBlocks.push(block);
+      eccBlocks.push(getECCCodewords(block, eccPerBlock));
+    }
+
+    const result = [];
+    const maxDataLen = Math.max(...dataBlocks.map(b => b.length));
+    for (let i = 0; i < maxDataLen; i++) {
+      for (const block of dataBlocks) {
+        if (i < block.length) result.push(block[i]);
+      }
+    }
+    for (let i = 0; i < eccPerBlock; i++) {
+      for (const block of eccBlocks) {
+        if (i < block.length) result.push(block[i]);
+      }
+    }
+
+    return new Uint8Array(result);
+  }
+
+  function createMatrix(version) {
+    const n = getModuleCount(version);
+    const matrix = Array.from({length: n}, () => new Int8Array(n));  // 0=unset, 1=black, -1=white
+    const reserved = Array.from({length: n}, () => new Uint8Array(n)); // 1=reserved
+
+    function setModule(r, c, val) {
+      if (r >= 0 && r < n && c >= 0 && c < n) {
+        matrix[r][c] = val ? 1 : -1;
+        reserved[r][c] = 1;
+      }
+    }
+
+    // Finder patterns
+    function drawFinder(row, col) {
+      for (let dr = -1; dr <= 7; dr++) {
+        for (let dc = -1; dc <= 7; dc++) {
+          const r = row + dr, c = col + dc;
+          if (r < 0 || r >= n || c < 0 || c >= n) continue;
+          const isBlack = (dr >= 0 && dr <= 6 && (dc === 0 || dc === 6)) ||
+                          (dc >= 0 && dc <= 6 && (dr === 0 || dr === 6)) ||
+                          (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4);
+          setModule(r, c, isBlack);
+        }
+      }
+    }
+
+    drawFinder(0, 0);
+    drawFinder(0, n - 7);
+    drawFinder(n - 7, 0);
+
+    // Alignment patterns
+    const alignPos = getAlignmentPositions(version);
+    for (const r of alignPos) {
+      for (const c of alignPos) {
+        if (reserved[r]?.[c]) continue;
+        for (let dr = -2; dr <= 2; dr++) {
+          for (let dc = -2; dc <= 2; dc++) {
+            const isBlack = Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0);
+            setModule(r + dr, c + dc, isBlack);
+          }
+        }
+      }
+    }
+
+    // Timing patterns
+    for (let i = 8; i < n - 8; i++) {
+      if (!reserved[6][i]) setModule(6, i, i % 2 === 0);
+      if (!reserved[i][6]) setModule(i, 6, i % 2 === 0);
+    }
+
+    // Dark module
+    setModule(n - 8, 8, true);
+
+    // Reserve format info areas
+    for (let i = 0; i < 8; i++) {
+      if (!reserved[8][i]) { reserved[8][i] = 1; }
+      if (!reserved[8][n - 1 - i]) { reserved[8][n - 1 - i] = 1; }
+      if (!reserved[i][8]) { reserved[i][8] = 1; }
+      if (!reserved[n - 1 - i][8]) { reserved[n - 1 - i][8] = 1; }
+    }
+    if (!reserved[8][8]) reserved[8][8] = 1;
+
+    // Reserve version info areas (version >= 7)
+    if (version >= 7) {
+      for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 3; j++) {
+          reserved[i][n - 11 + j] = 1;
+          reserved[n - 11 + j][i] = 1;
+        }
+      }
+    }
+
+    return { matrix, reserved, size: n };
+  }
+
+  function getAlignmentPositions(version) {
+    if (version <= 1) return [];
+    const table = [
+      [],[], [6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],
+      [6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],
+      [6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],
+      [6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],
+      [6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],
+      [6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],
+      [6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],
+      [6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],
+      [6,32,58,84,110,136,162],[6,26,54,82,110,138,166]
+    ];
+    return table[version] || [];
+  }
+
+  function placeData(matrixInfo, codewords) {
+    const { matrix, reserved, size: n } = matrixInfo;
+    let bitIdx = 0;
+    const totalBits = codewords.length * 8;
+
+    for (let right = n - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let vert = 0; vert < n; vert++) {
+        for (let j = 0; j < 2; j++) {
+          const col = right - j;
+          const row = ((Math.floor((n - 1 - right + (right < 6 ? 1 : 0)) / 2)) % 2 === 0)
+            ? n - 1 - vert : vert;
+          if (reserved[row][col]) continue;
+          if (bitIdx < totalBits) {
+            const bit = (codewords[Math.floor(bitIdx / 8)] >> (7 - (bitIdx % 8))) & 1;
+            matrix[row][col] = bit ? 1 : -1;
+            bitIdx++;
+          } else {
+            matrix[row][col] = -1;
+          }
+        }
+      }
+    }
+  }
+
+  function applyMask(matrix, reserved, size, maskNum) {
+    const maskFn = [
+      (r, c) => (r + c) % 2 === 0,
+      (r, c) => r % 2 === 0,
+      (r, c) => c % 3 === 0,
+      (r, c) => (r + c) % 3 === 0,
+      (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
+      (r, c) => (r * c) % 2 + (r * c) % 3 === 0,
+      (r, c) => ((r * c) % 2 + (r * c) % 3) % 2 === 0,
+      (r, c) => ((r + c) % 2 + (r * c) % 3) % 2 === 0,
+    ][maskNum];
+
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (!reserved[r][c] && maskFn(r, c)) {
+          matrix[r][c] = matrix[r][c] === 1 ? -1 : 1;
+        }
+      }
+    }
+  }
+
+  function writeFormatInfo(matrix, size, maskNum) {
+    const FORMAT_BITS = [
+      0x5412,0x5125,0x5E7C,0x5B4B,0x45F9,0x40CE,0x4F97,0x4AA0,
+      0x77C4,0x72F3,0x7DAA,0x789D,0x662F,0x6318,0x6C41,0x6976,
+      0x1689,0x13BE,0x1CE7,0x19D0,0x0762,0x0255,0x0D0C,0x083B,
+      0x355F,0x3068,0x3F31,0x3A06,0x24B4,0x2183,0x2EDA,0x2BED
+    ];
+
+    // ECL M = 00, mask 0-7
+    const formatInfo = FORMAT_BITS[maskNum]; // ECL M starts at index 0
+
+    // Horizontal: left side
+    const bits = [];
+    for (let i = 14; i >= 0; i--) bits.push((formatInfo >> i) & 1);
+
+    // Around top-left finder
+    const posH = [0,1,2,3,4,5,7,8,8,8,8,8,8,8,8];
+    const posV = [8,8,8,8,8,8,8,8,7,5,4,3,2,1,0];
+    for (let i = 0; i < 15; i++) {
+      const val = bits[i] ? 1 : -1;
+      matrix[posV[i]][posH[i]] = val;
+    }
+
+    // Around top-right and bottom-left finders
+    for (let i = 0; i < 8; i++) {
+      matrix[8][size - 1 - i] = bits[i] ? 1 : -1;
+    }
+    for (let i = 0; i < 7; i++) {
+      matrix[size - 1 - i][8] = bits[8 + i] ? 1 : -1;
+    }
+  }
+
+  function calcPenalty(matrix, size) {
+    let penalty = 0;
+
+    // Rule 1: consecutive same-color modules in row/col
+    for (let r = 0; r < size; r++) {
+      let count = 1;
+      for (let c = 1; c < size; c++) {
+        if (matrix[r][c] === matrix[r][c - 1]) {
+          count++;
+          if (count === 5) penalty += 3;
+          else if (count > 5) penalty++;
+        } else {
+          count = 1;
+        }
+      }
+    }
+    for (let c = 0; c < size; c++) {
+      let count = 1;
+      for (let r = 1; r < size; r++) {
+        if (matrix[r][c] === matrix[r - 1][c]) {
+          count++;
+          if (count === 5) penalty += 3;
+          else if (count > 5) penalty++;
+        } else {
+          count = 1;
+        }
+      }
+    }
+
+    // Rule 2: 2x2 blocks
+    for (let r = 0; r < size - 1; r++) {
+      for (let c = 0; c < size - 1; c++) {
+        const v = matrix[r][c];
+        if (v === matrix[r][c + 1] && v === matrix[r + 1][c] && v === matrix[r + 1][c + 1]) {
+          penalty += 3;
+        }
+      }
+    }
+
+    return penalty;
+  }
+
+  function generate(text) {
+    const bytes = new TextEncoder().encode(text);
+    const version = getVersion(bytes.length);
+    if (version < 0) throw new Error('Data too long');
+
+    const dataCodewords = encodeData(text, version);
+    const allCodewords = interleaveAndECC(dataCodewords, version);
+    const matrixInfo = createMatrix(version);
+
+    placeData(matrixInfo, allCodewords);
+
+    // Try all 8 masks, pick best
+    let bestMask = 0;
+    let bestPenalty = Infinity;
+    const { size } = matrixInfo;
+
+    for (let m = 0; m < 8; m++) {
+      const testMatrix = matrixInfo.matrix.map(row => Int8Array.from(row));
+      applyMask(testMatrix, matrixInfo.reserved, size, m);
+      writeFormatInfo(testMatrix, size, m);
+      const p = calcPenalty(testMatrix, size);
+      if (p < bestPenalty) {
+        bestPenalty = p;
+        bestMask = m;
+      }
+    }
+
+    applyMask(matrixInfo.matrix, matrixInfo.reserved, size, bestMask);
+    writeFormatInfo(matrixInfo.matrix, size, bestMask);
+
+    return { matrix: matrixInfo.matrix, size };
+  }
+
+  function render(qr, canvas, pixelSize, logoImg) {
+    const { matrix: qrMatrix, size: n } = qr;
+    const cellSize = Math.max(2, Math.floor(pixelSize / (n + 8)));
+    const padding = cellSize * 4;
+    const totalSize = cellSize * n + padding * 2;
+
+    canvas.width = totalSize;
+    canvas.height = totalSize;
+    const ctx = canvas.getContext('2d');
+
+    // White background with rounded corners
+    const radius = Math.max(4, totalSize * 0.03);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(radius, 0);
+    ctx.lineTo(totalSize - radius, 0);
+    ctx.quadraticCurveTo(totalSize, 0, totalSize, radius);
+    ctx.lineTo(totalSize, totalSize - radius);
+    ctx.quadraticCurveTo(totalSize, totalSize, totalSize - radius, totalSize);
+    ctx.lineTo(radius, totalSize);
+    ctx.quadraticCurveTo(0, totalSize, 0, totalSize - radius);
+    ctx.lineTo(0, radius);
+    ctx.quadraticCurveTo(0, 0, radius, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Draw QR modules with slightly rounded dots for finder patterns
+    ctx.fillStyle = '#000000';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (qrMatrix[r][c] === 1) {
+          const x = padding + c * cellSize;
+          const y = padding + r * cellSize;
+          ctx.fillRect(x, y, cellSize, cellSize);
+        }
+      }
+    }
+
+    // Draw logo in center if provided
+    if (logoImg) {
+      const logoSize = Math.floor(totalSize * 0.08);
+      const logoX = (totalSize - logoSize) / 2;
+      const logoY = (totalSize - logoSize) / 2;
+      const logoPad = Math.max(2, logoSize * 0.08);
+      const logoRadius = Math.max(3, logoSize * 0.12);
+
+      // White background behind logo
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      const bx = logoX - logoPad, by = logoY - logoPad;
+      const bs = logoSize + logoPad * 2;
+      ctx.moveTo(bx + logoRadius, by);
+      ctx.lineTo(bx + bs - logoRadius, by);
+      ctx.quadraticCurveTo(bx + bs, by, bx + bs, by + logoRadius);
+      ctx.lineTo(bx + bs, by + bs - logoRadius);
+      ctx.quadraticCurveTo(bx + bs, by + bs, bx + bs - logoRadius, by + bs);
+      ctx.lineTo(bx + logoRadius, by + bs);
+      ctx.quadraticCurveTo(bx, by + bs, bx, by + bs - logoRadius);
+      ctx.lineTo(bx, by + logoRadius);
+      ctx.quadraticCurveTo(bx, by, bx + logoRadius, by);
+      ctx.closePath();
+      ctx.fill();
+
+      // Clip and draw logo with rounded corners
+      ctx.save();
+      ctx.beginPath();
+      const lr = Math.max(2, logoSize * 0.08);
+      ctx.moveTo(logoX + lr, logoY);
+      ctx.lineTo(logoX + logoSize - lr, logoY);
+      ctx.quadraticCurveTo(logoX + logoSize, logoY, logoX + logoSize, logoY + lr);
+      ctx.lineTo(logoX + logoSize, logoY + logoSize - lr);
+      ctx.quadraticCurveTo(logoX + logoSize, logoY + logoSize, logoX + logoSize - lr, logoY + logoSize);
+      ctx.lineTo(logoX + lr, logoY + logoSize);
+      ctx.quadraticCurveTo(logoX, logoY + logoSize, logoX, logoY + logoSize - lr);
+      ctx.lineTo(logoX, logoY + lr);
+      ctx.quadraticCurveTo(logoX, logoY, logoX + lr, logoY);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+      ctx.restore();
+    }
+  }
+
+  return { generate, render };
+})();
 
 // Toast Notifications
 function showToast(message) {

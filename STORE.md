@@ -4,8 +4,8 @@
 
 | 字段 | 内容 |
 |------|------|
-| **扩展名称** | DevCodec - Base64, URL, JWT, HTML Encoder/Decoder |
-| **简短描述** | All-in-one developer tool for encoding/decoding: Base64, URL, JWT, HTML entities, timestamp conversion, and hash generation. |
+| **扩展名称** | DevCodec - Developer Encoding/Decoding Toolkit |
+| **简短描述** | All-in-one developer toolkit: Base64, URL, JWT, HTML encoding/decoding, timestamp conversion, hash generation, password generator, and QR code generator. |
 | **详细描述** | 见下方 |
 | **类别** | Developer Tools |
 | **语言** | English, 中文 (简体) |
@@ -14,7 +14,7 @@
 ## 详细描述
 
 ```
-DevCodec is a powerful all-in-one encoding/decoding tool designed for developers.
+DevCodec is a powerful all-in-one developer toolkit for encoding, decoding, and everyday utilities.
 
 🛠️ Features:
 • Base64 Encode/Decode - Support Unicode characters
@@ -23,6 +23,8 @@ DevCodec is a powerful all-in-one encoding/decoding tool designed for developers
 • HTML Entity Encode/Decode - Convert special characters
 • Timestamp Converter - Seconds/Milliseconds ↔ DateTime
 • Hash Generator - MD5 and SHA-256
+• Password Generator - Secure random passwords with crack time estimation
+• QR Code Generator - Auto https://, center logo embedding, multi-size download
 
 ✨ Highlights:
 • Clean, modern UI with dark/light theme support
@@ -35,7 +37,7 @@ Perfect for web developers, backend engineers, and anyone working with encoded d
 
 ---
 
-DevCodec 是一款强大的开发者编解码多合一工具。
+DevCodec 是一款强大的开发者一站式工具箱。
 
 🛠️ 功能：
 • Base64 编解码 - 支持 Unicode 字符
@@ -44,6 +46,8 @@ DevCodec 是一款强大的开发者编解码多合一工具。
 • HTML 实体编解码 - 转换特殊字符
 • 时间戳转换 - 秒/毫秒 ↔ 日期时间
 • 哈希生成器 - MD5 和 SHA-256
+• 随机密码生成器 - 安全随机密码，显示破解时间估算
+• 二维码生成器 - 自动补全 https://，支持中心 Logo 嵌入，多规格下载
 
 ✨ 亮点：
 • 简洁现代的 UI，支持深色/浅色模式

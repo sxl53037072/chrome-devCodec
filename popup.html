@@ -82,6 +82,21 @@
           </svg>
           <span data-i18n="nav.hash">Hash</span>
         </button>
+        <button class="nav-item" data-tool="password" title="Password">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M2 12h4"/><path d="M18 12h4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span data-i18n="nav.password">Pwd</span>
+        </button>
+        <button class="nav-item" data-tool="qrcode" title="QR Code">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+            <line x1="21" y1="14" x2="21" y2="17"/><line x1="14" y1="21" x2="17" y2="21"/>
+          </svg>
+          <span data-i18n="nav.qrcode">QR</span>
+        </button>
       </nav>
 
       <!-- Tool Content -->
@@ -273,6 +288,99 @@
                   <input type="text" id="hash-output-sha256" readonly>
                   <button class="copy-btn" data-target="hash-output-sha256">⎘</button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Generator Tool -->
+        <div class="tool-panel" id="panel-password">
+          <div class="tool-header">
+            <h2 data-i18n="tools.password.title">Password Generator</h2>
+          </div>
+          <div class="tool-body">
+            <div class="pwd-config">
+              <div class="pwd-length-row">
+                <label data-i18n="tools.password.length">Length</label>
+                <div class="pwd-length-control">
+                  <input type="range" id="pwd-length-slider" min="4" max="64" value="16">
+                  <input type="number" id="pwd-length-num" min="4" max="64" value="16">
+                </div>
+              </div>
+              <div class="pwd-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="pwd-uppercase" checked>
+                  <span>A-Z</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="pwd-lowercase" checked>
+                  <span>a-z</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="pwd-numbers" checked>
+                  <span>0-9</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="pwd-symbols">
+                  <span data-i18n="tools.password.symbols">!@#$</span>
+                </label>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="pwd-generate" class="btn btn-primary" data-i18n="tools.password.generate">Generate</button>
+              <button id="pwd-batch" class="btn btn-secondary" data-i18n="tools.password.batch">Batch x5</button>
+            </div>
+            <div class="pwd-output-section" id="pwd-output-section">
+              <div class="pwd-result-row">
+                <input type="text" id="pwd-output" readonly placeholder="">
+                <button class="copy-btn" data-target="pwd-output" style="position:static;opacity:0.8">⎘</button>
+              </div>
+              <div class="pwd-meta">
+                <div class="pwd-strength" id="pwd-strength"></div>
+                <div class="pwd-crack-time" id="pwd-crack-time"></div>
+              </div>
+            </div>
+            <div class="pwd-batch-results" id="pwd-batch-results" style="display:none;"></div>
+          </div>
+        </div>
+
+        <!-- QR Code Generator Tool -->
+        <div class="tool-panel" id="panel-qrcode">
+          <div class="tool-header">
+            <h2 data-i18n="tools.qrcode.title">QR Code Generator</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="tools.qrcode.url">URL or Text</label>
+              <textarea id="qr-input" placeholder="https://example.com"></textarea>
+            </div>
+            <div class="qr-options">
+              <label class="checkbox-label">
+                <input type="checkbox" id="qr-auto-https" checked>
+                <span data-i18n="tools.qrcode.autoHttps">Auto https://</span>
+              </label>
+              <label class="qr-logo-label">
+                <span data-i18n="tools.qrcode.logo">Center Logo</span>
+                <input type="file" id="qr-logo-input" accept="image/*" hidden>
+                <button id="qr-logo-btn" class="btn btn-secondary btn-sm" data-i18n="tools.qrcode.uploadLogo">Upload</button>
+                <span id="qr-logo-name" class="qr-logo-name"></span>
+                <button id="qr-logo-clear" class="btn btn-icon btn-xs" title="Clear" style="display:none">✕</button>
+              </label>
+            </div>
+            <div class="actions">
+              <button id="qr-generate" class="btn btn-primary" data-i18n="tools.qrcode.generate">Generate</button>
+              <button id="qr-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="qr-output" id="qr-output" style="display:none;">
+              <canvas id="qr-canvas"></canvas>
+              <div class="qr-actions">
+                <button id="qr-copy-img" class="btn btn-secondary" data-i18n="tools.qrcode.copyImage">Copy Image</button>
+              </div>
+              <div class="qr-download-sizes">
+                <span class="qr-download-label" data-i18n="tools.qrcode.downloadAs">Download:</span>
+                <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="200">S 200px</button>
+                <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="400">M 400px</button>
+                <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="800">L 800px</button>
               </div>
             </div>
           </div>

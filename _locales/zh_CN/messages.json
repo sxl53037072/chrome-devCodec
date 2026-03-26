@@ -1,8 +1,8 @@
 {
   "extName": {
-    "message": "DevCodec - Base64, URL, JWT, HTML 编解码工具"
+    "message": "DevCodec - 开发者编解码工具箱"
   },
   "extDescription": {
-    "message": "开发者一站式编解码工具，支持 Base64、URL、JWT、HTML 实体、时间戳转换和哈希生成。"
+    "message": "开发者一站式工具箱，支持 Base64、URL、JWT、HTML 实体编解码、时间戳转换、哈希生成、随机密码生成和二维码生成。"
   }
 }

@@ -631,6 +631,259 @@ input[type="datetime-local"]:focus {
   flex-shrink: 0;
 }
 
+/* ===== Password Tool ===== */
+.pwd-config {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pwd-length-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pwd-length-row > label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pwd-length-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pwd-length-control input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-default);
+  border-radius: 2px;
+  outline: none;
+}
+
+.pwd-length-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gradient-main);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.pwd-length-control input[type="number"] {
+  width: 52px;
+  padding: 5px 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.pwd-length-control input[type="number"]::-webkit-inner-spin-button,
+.pwd-length-control input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.pwd-length-control input[type="number"]:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.pwd-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pwd-output-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pwd-result-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pwd-result-row input {
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+}
+
+.pwd-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pwd-strength {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-left: 2px;
+}
+
+.pwd-crack-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.pwd-crack-time .crack-label {
+  color: var(--text-muted);
+}
+
+.pwd-crack-time .crack-value {
+  font-weight: 700;
+}
+
+.pwd-batch-results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.pwd-batch-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pwd-batch-row input {
+  flex: 1;
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  letter-spacing: 0.02em;
+}
+
+/* ===== QR Code Tool ===== */
+.qr-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qr-logo-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.qr-logo-label > span:first-child {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  min-width: 80px;
+}
+
+.qr-logo-name {
+  font-size: 10px;
+  color: var(--accent-cyan);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 10px;
+}
+
+.btn-xs {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.qr-output {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.qr-output canvas {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.qr-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.qr-download-sizes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.qr-download-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.qr-dl-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* ===== Sidebar scrollable ===== */
+.sidebar {
+  overflow-y: auto;
+}
+
 /* ===== Toast ===== */
 .toast {
   position: fixed;
