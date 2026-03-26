@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevCodec</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        <span>DevCodec</span>
+      </div>
+      <div class="header-actions">
+        <button id="langToggle" class="icon-btn" title="Switch Language">EN</button>
+        <button id="themeToggle" class="icon-btn" title="Toggle Theme">🌙</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar">
+        <button class="nav-item active" data-tool="base64" title="Base64">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <text x="4" y="17" font-size="14" font-weight="bold">B64</text>
+          </svg>
+          <span data-i18n="nav.base64">Base64</span>
+        </button>
+        <button class="nav-item" data-tool="url" title="URL">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <span data-i18n="nav.url">URL</span>
+        </button>
+        <button class="nav-item" data-tool="jwt" title="JWT">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span data-i18n="nav.jwt">JWT</span>
+        </button>
+        <button class="nav-item" data-tool="html" title="HTML">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span data-i18n="nav.html">HTML</span>
+        </button>
+        <button class="nav-item" data-tool="timestamp" title="Timestamp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span data-i18n="nav.timestamp">Time</span>
+        </button>
+        <button class="nav-item" data-tool="hash" title="Hash">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span data-i18n="nav.hash">Hash</span>
+        </button>
+      </nav>
+
+      <!-- Tool Content -->
+      <div class="content">
+        <!-- Base64 Tool -->
+        <div class="tool-panel active" id="panel-base64">
+          <div class="tool-header">
+            <h2 data-i18n="tools.base64.title">Base64 Encoder/Decoder</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="common.input">Input</label>
+              <textarea id="base64-input" placeholder="Enter text to encode or decode..."></textarea>
+            </div>
+            <div class="actions">
+              <button id="base64-encode" class="btn btn-primary" data-i18n="common.encode">Encode</button>
+              <button id="base64-decode" class="btn btn-secondary" data-i18n="common.decode">Decode</button>
+              <button id="base64-swap" class="btn btn-icon" title="Swap">⇅</button>
+              <button id="base64-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="input-group">
+              <label data-i18n="common.output">Output</label>
+              <textarea id="base64-output" readonly placeholder="Result will appear here..."></textarea>
+              <button class="copy-btn" data-target="base64-output">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- URL Tool -->
+        <div class="tool-panel" id="panel-url">
+          <div class="tool-header">
+            <h2 data-i18n="tools.url.title">URL Encoder/Decoder</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="common.input">Input</label>
+              <textarea id="url-input" placeholder="Enter URL or text..."></textarea>
+            </div>
+            <div class="actions">
+              <button id="url-encode" class="btn btn-primary" data-i18n="common.encode">Encode</button>
+              <button id="url-decode" class="btn btn-secondary" data-i18n="common.decode">Decode</button>
+              <button id="url-swap" class="btn btn-icon" title="Swap">⇅</button>
+              <button id="url-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="input-group">
+              <label data-i18n="common.output">Output</label>
+              <textarea id="url-output" readonly placeholder="Result will appear here..."></textarea>
+              <button class="copy-btn" data-target="url-output">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- JWT Tool -->
+        <div class="tool-panel" id="panel-jwt">
+          <div class="tool-header">
+            <h2 data-i18n="tools.jwt.title">JWT Decoder</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="tools.jwt.token">JWT Token</label>
+              <textarea id="jwt-input" placeholder="Paste JWT token here..."></textarea>
+            </div>
+            <div class="actions">
+              <button id="jwt-decode" class="btn btn-primary" data-i18n="tools.jwt.decode">Decode</button>
+              <button id="jwt-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="jwt-sections" id="jwt-output" style="display: none;">
+              <div class="jwt-section">
+                <h3 data-i18n="tools.jwt.header">Header</h3>
+                <pre id="jwt-header"></pre>
+              </div>
+              <div class="jwt-section">
+                <h3 data-i18n="tools.jwt.payload">Payload</h3>
+                <pre id="jwt-payload"></pre>
+                <div id="jwt-expiry" class="jwt-expiry"></div>
+              </div>
+              <div class="jwt-section">
+                <h3 data-i18n="tools.jwt.signature">Signature</h3>
+                <p class="jwt-note" data-i18n="tools.jwt.signatureNote">Signature verification requires secret key</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTML Tool -->
+        <div class="tool-panel" id="panel-html">
+          <div class="tool-header">
+            <h2 data-i18n="tools.html.title">HTML Entity Encoder/Decoder</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="common.input">Input</label>
+              <textarea id="html-input" placeholder="Enter text with HTML entities..."></textarea>
+            </div>
+            <div class="actions">
+              <button id="html-encode" class="btn btn-primary" data-i18n="common.encode">Encode</button>
+              <button id="html-decode" class="btn btn-secondary" data-i18n="common.decode">Decode</button>
+              <button id="html-swap" class="btn btn-icon" title="Swap">⇅</button>
+              <button id="html-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="input-group">
+              <label data-i18n="common.output">Output</label>
+              <textarea id="html-output" readonly placeholder="Result will appear here..."></textarea>
+              <button class="copy-btn" data-target="html-output">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timestamp Tool -->
+        <div class="tool-panel" id="panel-timestamp">
+          <div class="tool-header">
+            <h2 data-i18n="tools.timestamp.title">Timestamp Converter</h2>
+          </div>
+          <div class="tool-body">
+            <div class="timestamp-section">
+              <h3 data-i18n="tools.timestamp.toDate">Timestamp to DateTime</h3>
+              <div class="input-row">
+                <input type="text" id="ts-input" placeholder="1711452600">
+                <select id="ts-unit">
+                  <option value="s" data-i18n="tools.timestamp.seconds">Seconds</option>
+                  <option value="ms" data-i18n="tools.timestamp.milliseconds">Milliseconds</option>
+                </select>
+              </div>
+              <div class="output-row">
+                <input type="text" id="ts-output-date" readonly placeholder="2024-03-26 15:30:00">
+                <button class="copy-btn" data-target="ts-output-date">📋</button>
+              </div>
+            </div>
+            <div class="timestamp-divider">
+              <button id="ts-swap" class="btn btn-icon">⇅</button>
+            </div>
+            <div class="timestamp-section">
+              <h3 data-i18n="tools.timestamp.toTimestamp">DateTime to Timestamp</h3>
+              <div class="input-row">
+                <input type="datetime-local" id="date-input">
+              </div>
+              <div class="output-row">
+                <input type="text" id="date-output-ts" readonly placeholder="1711452600">
+                <select id="date-output-unit">
+                  <option value="s" data-i18n="tools.timestamp.seconds">Seconds</option>
+                  <option value="ms" data-i18n="tools.timestamp.milliseconds">Milliseconds</option>
+                </select>
+                <button class="copy-btn" data-target="date-output-ts">📋</button>
+              </div>
+            </div>
+            <div class="timestamp-current">
+              <button id="ts-current" class="btn btn-secondary">
+                <span data-i18n="tools.timestamp.current">Current Timestamp</span>: <span id="current-ts"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hash Tool -->
+        <div class="tool-panel" id="panel-hash">
+          <div class="tool-header">
+            <h2 data-i18n="tools.hash.title">Hash Generator</h2>
+          </div>
+          <div class="tool-body">
+            <div class="input-group">
+              <label data-i18n="common.input">Input</label>
+              <textarea id="hash-input" placeholder="Enter text to hash..."></textarea>
+            </div>
+            <div class="hash-algorithms">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hash-md5" checked>
+                <span>MD5</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="hash-sha256" checked>
+                <span>SHA-256</span>
+              </label>
+            </div>
+            <div class="actions">
+              <button id="hash-generate" class="btn btn-primary" data-i18n="tools.hash.generate">Generate</button>
+              <button id="hash-clear" class="btn btn-icon" title="Clear">✕</button>
+            </div>
+            <div class="hash-results" id="hash-results">
+              <div class="hash-result" id="hash-result-md5" style="display: none;">
+                <label>MD5:</label>
+                <div class="hash-output-row">
+                  <input type="text" id="hash-output-md5" readonly>
+                  <button class="copy-btn" data-target="hash-output-md5">📋</button>
+                </div>
+              </div>
+              <div class="hash-result" id="hash-result-sha256" style="display: none;">
+                <label>SHA-256:</label>
+                <div class="hash-output-row">
+                  <input type="text" id="hash-output-sha256" readonly>
+                  <button class="copy-btn" data-target="hash-output-sha256">📋</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
