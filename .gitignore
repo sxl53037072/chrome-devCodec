@@ -1,9 +1,9 @@
 # Dependencies
 node_modules/
 
-# Icons (generated)
-icons/*.png
-!icons/.gitkeep
+# Icons (keep PNG files for distribution)
+# icons/*.png
+# !icons/.gitkeep
 
 # OS files
 .DS_Store
