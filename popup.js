@@ -11,7 +11,8 @@ const translations = {
       timestamp: 'Time',
       hash: 'Hash',
       password: 'Pwd',
-      qrcode: 'QR'
+      qrcode: 'QR',
+      regex: 'Regex'
     },
     common: {
       input: 'Input',
@@ -80,6 +81,15 @@ const translations = {
         uploadLogo: 'Upload',
         empty: 'Please enter text or URL',
         tooLong: 'Text too long for QR code (max ~900 chars)'
+      },
+      regex: {
+        title: 'Regex Tester',
+        testText: 'Test Text',
+        groups: 'Capture Groups',
+        templates: 'Templates',
+        copyAs: 'Copy as',
+        matchCount: '{n} matches',
+        noMatch: 'No match'
       }
     }
   },
@@ -92,7 +102,8 @@ const translations = {
       timestamp: '时间',
       hash: '哈希',
       password: '密码',
-      qrcode: '二维码'
+      qrcode: '二维码',
+      regex: '正则'
     },
     common: {
       input: '输入',
@@ -161,6 +172,15 @@ const translations = {
         uploadLogo: '上传',
         empty: '请输入文本或 URL',
         tooLong: '文本过长，无法生成二维码（最多约 900 字符）'
+      },
+      regex: {
+        title: '正则表达式测试器',
+        testText: '测试文本',
+        groups: '捕获组',
+        templates: '模板库',
+        copyAs: '复制为',
+        matchCount: '{n} 个匹配',
+        noMatch: '无匹配'
       }
     }
   }
@@ -235,6 +255,7 @@ function setLanguage(lang) {
   
   // Update placeholders
   updatePlaceholders();
+  if (window._regexRebuildTemplates) window._regexRebuildTemplates();
 }
 
 function getTranslation(keyPath) {
@@ -316,6 +337,7 @@ function initTools() {
   initHashTool();
   initPasswordTool();
   initQRCodeTool();
+  initRegexTool();
   initCopyButtons();
 }
 
@@ -1348,4 +1370,296 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.remove('show');
   }, 2000);
+}
+
+// ===== Regex Tester Tool =====
+
+const REGEX_TEMPLATES = [
+  { name: 'Email', pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', nameZh: '邮箱' },
+  { name: 'Phone (CN)', pattern: '1[3-9]\\d{9}', nameZh: '手机号(中国)' },
+  { name: 'Phone (US)', pattern: '\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}', nameZh: '电话(美国)' },
+  { name: 'IPv4', pattern: '(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)', nameZh: 'IPv4 地址' },
+  { name: 'IPv6', pattern: '([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}', nameZh: 'IPv6 地址' },
+  { name: 'URL', pattern: 'https?://[\\w\\-]+(\\.[\\w\\-]+)+[/\\w\\-.~:/?#\\[\\]@!$&\'()*+,;=%]*', nameZh: 'URL 链接' },
+  { name: 'Date (YYYY-MM-DD)', pattern: '\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])', nameZh: '日期(YYYY-MM-DD)' },
+  { name: 'Date (DD/MM/YYYY)', pattern: '(?:0[1-9]|[12]\\d|3[01])/(?:0[1-9]|1[0-2])/\\d{4}', nameZh: '日期(DD/MM/YYYY)' },
+  { name: 'Time (HH:MM:SS)', pattern: '(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d', nameZh: '时间(HH:MM:SS)' },
+  { name: 'Hex Color', pattern: '#(?:[0-9a-fA-F]{3}){1,2}', nameZh: '十六进制颜色' },
+  { name: 'HTML Tag', pattern: '<([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*>.*?</\\1>', nameZh: 'HTML 标签' },
+  { name: 'Integer', pattern: '-?\\d+', nameZh: '整数' },
+  { name: 'Decimal', pattern: '-?\\d+\\.\\d+', nameZh: '小数' },
+  { name: 'UUID', pattern: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', nameZh: 'UUID' },
+  { name: 'MAC Address', pattern: '(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}', nameZh: 'MAC 地址' },
+  { name: 'Username', pattern: '[a-zA-Z][a-zA-Z0-9_]{2,15}', nameZh: '用户名' },
+  { name: 'Strong Password', pattern: '(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}', nameZh: '强密码' },
+  { name: 'CN ID Card', pattern: '[1-9]\\d{5}(?:19|20)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]', nameZh: '身份证号' },
+  { name: 'CN Postal Code', pattern: '[1-9]\\d{5}', nameZh: '邮政编码' },
+  { name: 'Domain', pattern: '(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}', nameZh: '域名' },
+  { name: 'CSS Class', pattern: '\\.[a-zA-Z_][a-zA-Z0-9_-]*', nameZh: 'CSS 类名' },
+  { name: 'JSON Key', pattern: '"([^"]+)"\\s*:', nameZh: 'JSON Key' },
+  { name: 'Markdown Link', pattern: '\\[([^\\]]+)\\]\\(([^)]+)\\)', nameZh: 'Markdown 链接' },
+  { name: 'Base64', pattern: '[A-Za-z0-9+/]{4,}={0,2}', nameZh: 'Base64 编码' },
+  { name: 'JWT', pattern: 'eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+', nameZh: 'JWT Token' },
+  { name: 'Whitespace Trim', pattern: '^\\s+|\\s+$', nameZh: '首尾空白' },
+  { name: 'Blank Lines', pattern: '^\\s*$', nameZh: '空行' },
+  { name: 'CamelCase', pattern: '[a-z]+(?:[A-Z][a-z0-9]+)+', nameZh: '驼峰命名' },
+  { name: 'SNAKE_CASE', pattern: '[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+', nameZh: 'SNAKE_CASE' },
+  { name: 'File Extension', pattern: '\\.[a-zA-Z0-9]{1,10}$', nameZh: '文件扩展名' },
+  { name: 'Chinese Characters', pattern: '[\\u4e00-\\u9fa5]+', nameZh: '中文字符' },
+  { name: 'Emoji', pattern: '[\\u{1F600}-\\u{1F64F}\\u{1F300}-\\u{1F5FF}\\u{1F680}-\\u{1F6FF}\\u{1F1E0}-\\u{1F1FF}]', nameZh: 'Emoji 表情' },
+];
+
+function initRegexTool() {
+  const patternInput = $('#rx-pattern');
+  const testDisplay = $('#rx-test-display');
+  const flagBtns = $$('.rx-flag');
+  const matchCountEl = $('#rx-match-count');
+  const groupsContainer = $('#rx-groups');
+  const groupsList = $('#rx-groups-list');
+  const templatesBtn = $('#rx-templates-btn');
+  const templatesPanel = $('#rx-templates-panel');
+  const templateList = $('#rx-template-list');
+
+  let activeFlags = 'g';
+
+  buildTemplateList();
+
+  flagBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      activeFlags = Array.from($$('.rx-flag.active')).map(b => b.dataset.flag).join('');
+      runRegex();
+    });
+  });
+
+  let isComposing = false;
+  let highlightTimer = null;
+
+  testDisplay.addEventListener('compositionstart', () => { isComposing = true; });
+  testDisplay.addEventListener('compositionend', () => {
+    isComposing = false;
+    scheduleHighlight();
+  });
+
+  patternInput.addEventListener('input', () => { runRegex(true); });
+  testDisplay.addEventListener('input', () => {
+    if (!isComposing) scheduleHighlight();
+  });
+
+  function scheduleHighlight() {
+    clearTimeout(highlightTimer);
+    highlightTimer = setTimeout(() => runRegex(true), 80);
+  }
+
+  templatesBtn.addEventListener('click', () => {
+    const isVisible = templatesPanel.style.display !== 'none';
+    templatesPanel.style.display = isVisible ? 'none' : 'block';
+  });
+
+  $$('.rx-copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.lang;
+      const pattern = patternInput.value;
+      if (!pattern) return;
+      const code = formatRegexForLang(pattern, activeFlags, lang);
+      navigator.clipboard.writeText(code).then(() => showToast(translations[currentLang].common.copied));
+    });
+  });
+
+  function buildTemplateList() {
+    templateList.innerHTML = '';
+    REGEX_TEMPLATES.forEach(tpl => {
+      const item = document.createElement('div');
+      item.className = 'rx-template-item';
+      const name = currentLang === 'zh' ? tpl.nameZh : tpl.name;
+      item.innerHTML = `<span class="rx-tpl-name">${name}</span><code class="rx-tpl-pattern">${escapeHTML(tpl.pattern)}</code>`;
+      item.addEventListener('click', () => {
+        patternInput.value = tpl.pattern;
+        templatesPanel.style.display = 'none';
+        runRegex();
+      });
+      templateList.appendChild(item);
+    });
+  }
+
+  function getPlainText() {
+    return testDisplay.textContent || '';
+  }
+
+  function runRegex(doHighlight) {
+    const pattern = patternInput.value;
+    const text = getPlainText();
+
+    if (!pattern) {
+      if (doHighlight) applyHighlight(text, []);
+      matchCountEl.textContent = '';
+      groupsContainer.style.display = 'none';
+      return;
+    }
+
+    let regex;
+    try {
+      regex = new RegExp(pattern, activeFlags);
+    } catch (e) {
+      matchCountEl.textContent = '⚠ Invalid';
+      matchCountEl.style.color = 'var(--error)';
+      return;
+    }
+    matchCountEl.style.color = '';
+
+    const matches = [];
+    const groups = [];
+
+    if (activeFlags.includes('g')) {
+      let m;
+      const iterRegex = new RegExp(pattern, activeFlags);
+      while ((m = iterRegex.exec(text)) !== null) {
+        matches.push({ start: m.index, end: m.index + m[0].length, text: m[0] });
+        if (m.length > 1) {
+          const g = [];
+          for (let i = 1; i < m.length; i++) g.push({ index: i, value: m[i] || '' });
+          groups.push({ match: m[0], groups: g });
+        }
+        if (m[0].length === 0) iterRegex.lastIndex++;
+      }
+    } else {
+      const m = regex.exec(text);
+      if (m) {
+        matches.push({ start: m.index, end: m.index + m[0].length, text: m[0] });
+        if (m.length > 1) {
+          const g = [];
+          for (let i = 1; i < m.length; i++) g.push({ index: i, value: m[i] || '' });
+          groups.push({ match: m[0], groups: g });
+        }
+      }
+    }
+
+    const t = translations[currentLang].tools.regex;
+    matchCountEl.textContent = matches.length === 0
+      ? t.noMatch
+      : t.matchCount.replace('{n}', matches.length);
+
+    if (doHighlight) applyHighlight(text, matches);
+    renderGroups(groups);
+  }
+
+  function applyHighlight(text, matches) {
+    const hasFocus = document.activeElement === testDisplay || testDisplay.contains(document.activeElement);
+    let caretPos = -1;
+    if (hasFocus) caretPos = getCaretCharOffset(testDisplay);
+
+    if (matches.length === 0) {
+      testDisplay.innerHTML = escapeHTML(text);
+    } else {
+      let html = '';
+      let lastEnd = 0;
+      matches.forEach(m => {
+        html += escapeHTML(text.substring(lastEnd, m.start));
+        html += `<mark class="rx-highlight">${escapeHTML(text.substring(m.start, m.end))}</mark>`;
+        lastEnd = m.end;
+      });
+      html += escapeHTML(text.substring(lastEnd));
+      testDisplay.innerHTML = html;
+    }
+
+    if (hasFocus && caretPos >= 0) setCaretCharOffset(testDisplay, caretPos);
+  }
+
+  function getCaretCharOffset(element) {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return 0;
+    const range = sel.getRangeAt(0);
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(element);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    return preRange.toString().length;
+  }
+
+  function setCaretCharOffset(element, offset) {
+    const sel = window.getSelection();
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
+    let remaining = offset;
+    let node;
+    while ((node = walker.nextNode())) {
+      const len = node.textContent.length;
+      if (remaining <= len) {
+        const range = document.createRange();
+        range.setStart(node, remaining);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        return;
+      }
+      remaining -= len;
+    }
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function renderGroups(groups) {
+    if (groups.length === 0) {
+      groupsContainer.style.display = 'none';
+      return;
+    }
+    groupsContainer.style.display = 'block';
+    groupsList.innerHTML = '';
+    groups.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'rx-group-row';
+      let html = `<span class="rx-group-match">Match ${idx + 1}: <code>${escapeHTML(item.match)}</code></span>`;
+      item.groups.forEach(g => {
+        html += `<span class="rx-group-item">Group ${g.index}: <code>${escapeHTML(g.value)}</code></span>`;
+      });
+      row.innerHTML = html;
+      groupsList.appendChild(row);
+    });
+  }
+
+  window._regexRebuildTemplates = () => buildTemplateList();
+}
+
+function formatRegexForLang(pattern, flags, lang) {
+  const escaped = pattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  switch (lang) {
+    case 'js':
+      return `const regex = /${pattern}/${flags};\nconst matches = text.match(regex);`;
+    case 'java': {
+      const javaPattern = pattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const javaFlags = [];
+      if (flags.includes('i')) javaFlags.push('Pattern.CASE_INSENSITIVE');
+      if (flags.includes('m')) javaFlags.push('Pattern.MULTILINE');
+      if (flags.includes('s')) javaFlags.push('Pattern.DOTALL');
+      const flagStr = javaFlags.length ? ', ' + javaFlags.join(' | ') : '';
+      return `Pattern pattern = Pattern.compile("${javaPattern}"${flagStr});\nMatcher matcher = pattern.matcher(text);`;
+    }
+    case 'python': {
+      const pyFlags = [];
+      if (flags.includes('i')) pyFlags.push('re.IGNORECASE');
+      if (flags.includes('m')) pyFlags.push('re.MULTILINE');
+      if (flags.includes('s')) pyFlags.push('re.DOTALL');
+      const pf = pyFlags.length ? ', ' + pyFlags.join(' | ') : '';
+      const func = flags.includes('g') ? 'findall' : 'search';
+      return `import re\nmatches = re.${func}(r"${pattern}"${pf}, text)`;
+    }
+    case 'go': {
+      const goPattern = pattern.replace(/`/g, '` + "`" + `');
+      let prefix = '';
+      if (flags.includes('i')) prefix += '(?i)';
+      if (flags.includes('m')) prefix += '(?m)';
+      if (flags.includes('s')) prefix += '(?s)';
+      const func = flags.includes('g') ? 'FindAllString(text, -1)' : 'FindString(text)';
+      return `re := regexp.MustCompile(\`${prefix}${goPattern}\`)\nmatches := re.${func}`;
+    }
+    default:
+      return `/${pattern}/${flags}`;
+  }
+}
+
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
 }

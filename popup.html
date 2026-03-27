@@ -97,6 +97,13 @@
           </svg>
           <span data-i18n="nav.qrcode">QR</span>
         </button>
+        <button class="nav-item" data-tool="regex" title="Regex">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M12 4v8"/><path d="M6.5 7l5.5 5"/><path d="M17.5 7l-5.5 5"/>
+            <circle cx="12" cy="18" r="2"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
+          </svg>
+          <span data-i18n="nav.regex">Regex</span>
+        </button>
       </nav>
 
       <!-- Tool Content -->
@@ -381,6 +388,51 @@
                 <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="200">S 200px</button>
                 <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="400">M 400px</button>
                 <button class="btn btn-secondary btn-sm qr-dl-btn" data-size="800">L 800px</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Regex Tester Tool -->
+        <div class="tool-panel" id="panel-regex">
+          <div class="tool-header">
+            <h2 data-i18n="tools.regex.title">Regex Tester</h2>
+          </div>
+          <div class="tool-body">
+            <div class="rx-input-section">
+              <div class="rx-pattern-row">
+                <span class="rx-slash">/</span>
+                <input type="text" id="rx-pattern" placeholder="[a-z]+">
+                <span class="rx-slash">/</span>
+                <div class="rx-flags">
+                  <button class="rx-flag active" data-flag="g">g</button>
+                  <button class="rx-flag" data-flag="i">i</button>
+                  <button class="rx-flag" data-flag="m">m</button>
+                  <button class="rx-flag" data-flag="s">s</button>
+                </div>
+              </div>
+              <div class="rx-templates-toggle">
+                <button id="rx-templates-btn" class="btn btn-secondary btn-sm" data-i18n="tools.regex.templates">Templates</button>
+                <span id="rx-match-count" class="rx-match-count"></span>
+              </div>
+              <div id="rx-templates-panel" class="rx-templates-panel" style="display:none;">
+                <div class="rx-template-list" id="rx-template-list"></div>
+              </div>
+            </div>
+            <div class="input-group">
+              <label data-i18n="tools.regex.testText">Test Text</label>
+              <div id="rx-test-display" class="rx-test-display" contenteditable="true" spellcheck="false"></div>
+            </div>
+            <div id="rx-groups" class="rx-groups" style="display:none;">
+              <label data-i18n="tools.regex.groups">Capture Groups</label>
+              <div id="rx-groups-list" class="rx-groups-list"></div>
+            </div>
+            <div class="rx-export">
+              <label data-i18n="tools.regex.copyAs">Copy as</label>
+              <div class="rx-export-btns">
+                <button class="btn btn-secondary btn-sm rx-copy-btn" data-lang="js">JS</button>
+                <button class="btn btn-secondary btn-sm rx-copy-btn" data-lang="java">Java</button>
+                <button class="btn btn-secondary btn-sm rx-copy-btn" data-lang="python">Python</button>
+                <button class="btn btn-secondary btn-sm rx-copy-btn" data-lang="go">Go</button>
               </div>
             </div>
           </div>
