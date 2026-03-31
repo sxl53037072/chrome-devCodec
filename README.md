@@ -12,6 +12,7 @@ A Chrome browser extension providing all-in-one encoding/decoding and developer 
 - **Hash** - Generate MD5 and SHA-256 hashes
 - **Password Generator** - Cryptographically secure random passwords with customizable length, character types, strength indicator, and crack time estimation
 - **QR Code Generator** - Generate QR codes from URLs or text, with auto https:// completion, center logo embedding, and multi-size PNG download (200/400/800px)
+- **Regex Tester** - Real-time regex matching with highlighting, capture groups display, 32+ built-in templates, flags toggle (g/i/m/s), and one-click export to JS/Java/Python/Go code format
 
 ## Installation
 
@@ -62,6 +63,9 @@ MIT License - See [LICENSE](LICENSE) file
 Issues and pull requests are welcome!
 
 ## Changelog
+
+### v1.2.0 (2026-03-26)
+- Added Regex Tester with real-time highlighting, 32+ templates, and multi-language code export
 
 ### v1.1.0 (2026-03-26)
 - Added Password Generator with crack time estimation

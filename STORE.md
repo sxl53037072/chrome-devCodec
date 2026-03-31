@@ -5,7 +5,7 @@
 | 字段 | 内容 |
 |------|------|
 | **扩展名称** | DevCodec - Developer Encoding/Decoding Toolkit |
-| **简短描述** | All-in-one developer toolkit: Base64, URL, JWT, HTML encoding/decoding, timestamp conversion, hash generation, password generator, and QR code generator. |
+| **简短描述** | All-in-one developer toolkit: Base64, URL, JWT, HTML encoding/decoding, timestamp, hash, password, QR code, and regex tester. |
 | **详细描述** | 见下方 |
 | **类别** | Developer Tools |
 | **语言** | English, 中文 (简体) |
@@ -25,6 +25,7 @@ DevCodec is a powerful all-in-one developer toolkit for encoding, decoding, and 
 • Hash Generator - MD5 and SHA-256
 • Password Generator - Secure random passwords with crack time estimation
 • QR Code Generator - Auto https://, center logo embedding, multi-size download
+• Regex Tester - Real-time highlighting, 32+ templates, code export (JS/Java/Python/Go)
 
 ✨ Highlights:
 • Clean, modern UI with dark/light theme support
@@ -48,6 +49,7 @@ DevCodec 是一款强大的开发者一站式工具箱。
 • 哈希生成器 - MD5 和 SHA-256
 • 随机密码生成器 - 安全随机密码，显示破解时间估算
 • 二维码生成器 - 自动补全 https://，支持中心 Logo 嵌入，多规格下载
+• 正则表达式测试器 - 实时高亮匹配，32+ 内置模板，代码格式导出（JS/Java/Python/Go）
 
 ✨ 亮点：
 • 简洁现代的 UI，支持深色/浅色模式
